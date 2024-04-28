@@ -1,6 +1,16 @@
 import mongoose from 'mongoose';
 import Account from './accountModel';
+import { MongooseId } from './userModel';
 
+export interface IPayment {
+  user: MongooseId;
+  account: MongooseId;
+  tags: string[];
+  date: Date;
+  currency: string;
+  amount: number;
+  type: number;
+}
 const paymentSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,

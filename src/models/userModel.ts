@@ -93,17 +93,19 @@ userSchema.methods.comparePasswords = async function (
   return await bcrypt.compare(activePassword, passwordToCompare);
 };
 
-userSchema.virtual('accounts_owner', {
-  ref: 'Account',
-  foreignField: 'owner',
-  localField: '_id',
-});
+// userSchema.virtual('accounts_owner', {
+//   ref: 'Account',
+//   foreignField: 'owner',
+//   localField: '_id',
+//   select: 'name _id -payments',
+// });
 
-userSchema.virtual('accounts_guest', {
-  ref: 'Account',
-  foreignField: 'users',
-  localField: '_id',
-});
+// userSchema.virtual('accounts_guest', {
+//   ref: 'Account',
+//   foreignField: 'users',
+//   localField: '_id',
+// });
+//
 
 const User = mongoose.model('User', userSchema);
 

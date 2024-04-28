@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
+import { IPayment } from './paymentModel';
 
 export interface IAccount {
   name: string;
   type: string;
   createdAd: Date;
   owner: mongoose.Schema.Types.ObjectId;
+  payments: IPayment[];
   users: {
     user: mongoose.Schema.Types.ObjectId;
     contribution: number;
