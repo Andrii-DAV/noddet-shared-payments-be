@@ -81,5 +81,16 @@ paymentSchema.pre(/^find/, function (next) {
   (this as any).populate({ path: 'user', select: '-role -__v' });
   next();
 });
+
+paymentSchema.pre(/^findOneAnd/, async function (next) {
+  (this as any).prePayment = await (this as any).clone().findOne();
+  next();
+});
+paymentSchema.post(/^findOneAnd/, function () {
+  (this as any).prePayment.constructor.calcUserContribution(
+    (this as any).prePayment.account,
+    (this as any).prePayment.user._id,
+  );
+});
 const Payment = mongoose.model('Payment', paymentSchema);
 export default Payment;

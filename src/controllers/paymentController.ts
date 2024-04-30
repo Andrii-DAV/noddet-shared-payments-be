@@ -30,3 +30,16 @@ export const addPayment = catchAsync(async (req, res) => {
     data: newPayment,
   });
 });
+
+export const updatePayment = catchAsync(async (req, res) => {
+  const updatedPayment = await Payment.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true },
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: updatedPayment,
+  });
+});

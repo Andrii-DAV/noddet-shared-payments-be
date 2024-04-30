@@ -1,6 +1,6 @@
 import { catchAsync } from '../utils/common';
 import User from '../models/userModel';
-import Account, { IAccount } from '../models/accountModel';
+import Account from '../models/accountModel';
 
 export const userProfile = catchAsync(async (req, res, next) => {
   const {
