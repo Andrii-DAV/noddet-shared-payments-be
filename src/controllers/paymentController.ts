@@ -1,15 +1,11 @@
 import { catchAsync } from '../utils/common';
 import Payment from '../models/paymentModel';
 import Account from '../models/accountModel';
+import { deleteOne, getAll } from './handlerFactory';
 
-export const getAllPayments = catchAsync(async (req, res) => {
-  const payments = await Payment.find(req.query);
+export const getAllPayments = getAll(Payment);
+export const deletePayment = deleteOne(Payment);
 
-  res.status(200).json({
-    status: 'success',
-    data: payments,
-  });
-});
 export const addPayment = catchAsync(async (req, res) => {
   const { account } = req.body;
   const acc = await Account.findById(account);
@@ -30,7 +26,6 @@ export const addPayment = catchAsync(async (req, res) => {
     data: newPayment,
   });
 });
-
 export const updatePayment = catchAsync(async (req, res) => {
   const updatedPayment = await Payment.findByIdAndUpdate(
     req.params.id,
