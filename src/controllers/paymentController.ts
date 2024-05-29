@@ -3,7 +3,7 @@ import Payment from '../models/paymentModel';
 import Account from '../models/accountModel';
 import { deleteOne, getAll } from './handlerFactory';
 
-export const getAllPayments = getAll(Payment);
+export const getAllPayments = getAll(Payment, true);
 export const deletePayment = deleteOne(Payment);
 
 export const addPayment = catchAsync(async (req, res) => {

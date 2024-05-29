@@ -9,22 +9,33 @@ type PopulateOptions =
   | string[]
   | string;
 
-export const getAll = (model: Model) =>
+export const getAll = (model: Model, countTotal?: boolean) =>
   catchAsync(async (req, res) => {
     const filter = { ...req.params };
     const features = new APIQueryParams(model.find(filter), req.query)
       .filter()
       .sort()
-      .limitFields()
-      .paginate();
+      .limitFields();
 
-    const documents = await features.query;
+    let total = 0;
+    if (countTotal) {
+      total = (await features.query.clone()).length;
+    }
+    const documents = await features.paginate().query;
 
-    res.status(200).json({
+    const base = {
       status: 'success',
-      results: documents.length,
       data: documents,
-    });
+    };
+
+    res.status(200).json(
+      countTotal
+        ? {
+            total,
+            ...base,
+          }
+        : base,
+    );
   });
 
 export const deleteOne = (model: Model) =>
