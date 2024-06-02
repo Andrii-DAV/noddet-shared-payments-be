@@ -28,11 +28,19 @@ export const createAccount = catchAsync(async (req, res) => {
 });
 
 export const getCurrentAccInfo = catchAsync(async (req, res) => {
-  const acc = await Account.findById(req.params.id);
+  const acc = await Account.findById(req.params.id).select('-__v ');
 
   if (!acc) return res.status(404).json({ status: 'Not Found' });
 
-  res.status(200).json(acc);
+  const stat = await (acc as any).getStatistics();
+
+  (acc as any).users = acc.users.map((u) => ({
+    ...u,
+    debt: stat.usersDebts[u._id.toString()].debt,
+  }));
+  acc.total = stat.total;
+
+  res.status(200).json({ data: acc });
 });
 
 export const inviteUser = catchAsync(async (req, res, next) => {

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IPayment } from './paymentModel';
+import Payment, { IPayment } from './paymentModel';
 
 export interface IAccount {
   name: string;
@@ -28,6 +28,7 @@ const accountSchema = new mongoose.Schema(
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         contribution: Number,
+        debt: Number,
       },
     ],
     type: {
@@ -39,30 +40,48 @@ const accountSchema = new mongoose.Schema(
       type: Date,
       default: Date.now(),
     },
+    total: {
+      type: Number,
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
-
-accountSchema.virtual('payments', {
-  ref: 'Payment',
-  foreignField: 'account',
-  localField: '_id',
-});
-
-accountSchema.pre(/^find/, function (next) {
-  (this as any)
-    .populate({ path: 'users.user', select: '-__v -role' })
-    .populate({ path: 'payments', select: '-__v' });
+accountSchema.pre('save', function (next) {
+  if (this.isModified('total')) {
+    this.invalidate('total', 'You cannot update the total field');
+  }
   next();
 });
-accountSchema.virtual('total').get(function () {
-  return (this as any).payments.reduce(
-    (payment, curr) => payment + curr.amount,
-    0,
-  );
+accountSchema.methods.getStatistics = async function () {
+  const payments = await Payment.aggregate([
+    { $match: { account: this._id } },
+    {
+      $group: { _id: '$account', totalAmount: { $sum: '$amount' } },
+    },
+  ]);
+
+  const total = payments[0]?.totalAmount;
+  const divided = total / this.users.length;
+
+  const usersDebts = {};
+
+  (this as any).users.map((u) => {
+    const debt = divided - u.contribution;
+
+    usersDebts[u.id] = {
+      debt: debt <= 0 ? 0 : debt,
+    };
+  });
+
+  return { usersDebts, total };
+};
+
+accountSchema.pre(/^find/, function (next) {
+  (this as any).populate({ path: 'users.user', select: '-__v -role' });
+  next();
 });
 
 const Account = mongoose.model('Account', accountSchema);
